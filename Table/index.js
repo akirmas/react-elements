@@ -45,7 +45,6 @@ export default (props) => {
         ([_, i]) => enrichElement(
           row[i],
           {
-            key: 'TD' + rowIndex + i,
             className: `Cell ${classNamePrettify(headersArray[i][0])} Col${i + 1} Row${rowIndex + 1}`
           }
         )
