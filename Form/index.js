@@ -178,6 +178,7 @@ export default class Form extends React.Component {
         return <Input {...inputProps}/>
       }
     )
+    //TODO return just children - move ajaxSubmit to event-listener or directly to onClick
     return <>
       <form {...props}>{children}</form>
     </>
