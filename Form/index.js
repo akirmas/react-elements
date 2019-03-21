@@ -69,7 +69,10 @@ export default class Form extends React.Component {
   }
 
   ajaxSubmit(ev) {
-    ev.preventDefault()
+    if (ev) {
+      ev.preventDefault()
+    }
+
     this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
       {clicked = ''} = this.state,
@@ -182,7 +185,11 @@ export default class Form extends React.Component {
             },
             // Signing last click for handler
             (`before${name}` in this.props || `on${name}` in this.props || `after${name}` in this.props || input.type === 'submit')
-            ? { onClick: () => this.setState({clicked: name}) }
+            ? { onClick: () => {
+              this.setState({clicked: name}, () => {
+                this.ajaxSubmit(null, name);
+              });
+            } }
             : {}
           )
         return <Input {...inputProps}/>
@@ -190,7 +197,7 @@ export default class Form extends React.Component {
     )
     //TODO return just children - move ajaxSubmit to event-listener or directly to onClick
     return <>
-      <form {...props}>{children}</form>
+      {children}
     </>
   }
 }
