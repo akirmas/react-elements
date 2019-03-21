@@ -4,7 +4,7 @@ import Input from '../Input'
 
 export default class Form extends React.Component {
   state = {
-    loading: false,
+    disabled: false,
     clicked: ''
   }
   get dataPrefix() {
@@ -14,7 +14,7 @@ export default class Form extends React.Component {
   constructor(props) {
     super(props);
 
-    ['handleChange', 'pushData', 'ajaxSubmit', 'pushFromInjection']
+    ['handleChange', 'pushData', 'ajaxSubmit', 'pushFromInjection', 'setDisabled']
     .forEach(method => 
       this[method] = this[method].bind(this)  
     )
@@ -41,11 +41,21 @@ export default class Form extends React.Component {
     );
   }
 
+  setDisabled({detail: disabled}) {
+    this.setState({disabled})
+  }
+
   componentDidMount() {
     this.pushFromInjection({target: this.props.injector})
     this.props.injector.addEventListener('dataInjecting', this.pushFromInjection)
+    this.props.injector.addEventListener('disable', this.setDisabled)
   }
   
+  componentWillUnmount() {
+    this.props.injector.removeEventListener('dataInjecting', this.pushFromInjection)
+    this.props.injector.removeEventListener('disable', this.setDisabled)
+  }
+
   collectData() {
     return Object.assign({},
       ...Object.keys(this.state)
@@ -60,8 +70,8 @@ export default class Form extends React.Component {
 
   ajaxSubmit(ev) {
     ev.preventDefault()
-    this.setState({loading: true})
-    const setLoaded = () => this.setState({loading: false}),
+    this.setState({disabled: true})
+    const setLoaded = () => this.setState({disabled: false}),
       {clicked = ''} = this.state,
       handlerNameBefore = `before${clicked}`,
       handlerNameAfter = `after${clicked}`,
@@ -85,7 +95,6 @@ export default class Form extends React.Component {
           : {}
         )
       )
-        console.log(data)
     fetch(action, Object.assign(
       {
         method,
@@ -161,6 +170,7 @@ export default class Form extends React.Component {
               ...input,
               defaultValue: this.state[`${this.dataPrefix}${name}`],
               gridArea: [gridArea, name, input.tag].join('-'),
+              disabled: this.state.disabled || input.disabled,
               onChange: (ev, ...argv) => {
                 if (this.state[`${this.dataPrefix}${name}`] === ev.target.value)
                   return;
