@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Input from '../Input'
+import validators from './validators';
 
 export default class Form extends React.Component {
   state = {
@@ -119,6 +120,14 @@ export default class Form extends React.Component {
   }
 
   handleChange({target: {name, value}}) {
+    const { validator } = this.props.inputs[name];
+
+    if (validators[validator]) {
+      const isValid = validators[validator](value);
+
+      this.props.inputs[name].isValid = isValid;
+    }
+
     this.setState({ [`${this.dataPrefix}${name}`]: value })
   }
 
