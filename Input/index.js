@@ -6,19 +6,23 @@ export default (props) => {
       label = '',
       type = '',
       form_id = '',
+      isValid,
       disabled = false,
       required = false,
       style = {}
     } = props,
     params = Object.assign({name}, props)
 
+  console.log(props.isValid);
+
   const commonParams = (tag, params) =>
     Object.assign(params, {
       className:  [
         capitalizeFirstLetter(tag),
-        disabled ? ' Disabled' : '',
-        required ? ' Required' : ''
-      ].join(''),
+        disabled ? 'Disabled' : '',
+        required ? 'Required' : '',
+        typeof isValid !== 'undefined' ? isValid === true ? 'Valid' : 'NotValid' : 'NoValidation'
+      ].join(' '),
       key: `${tag}${name}`,
       style
     }),
