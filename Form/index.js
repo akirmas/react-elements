@@ -6,7 +6,8 @@ import validators from './validators';
 export default class Form extends React.Component {
   state = {
     disabled: false,
-    clicked: ''
+    clicked: '',
+    inputs: {}
   }
   get dataPrefix() {
     return 'data_'
