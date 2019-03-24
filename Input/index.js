@@ -9,14 +9,14 @@ export default (props) => {
       isValid,
       disabled = false,
       required = false,
-      style = {}
+      style = {},
+      parentKey
     } = props,
     params = Object.assign({name}, props)
 
-  console.log(props.isValid);
-
   const commonParams = (tag, params) =>
     Object.assign(params, {
+      'data-parentKey': parentKey,
       className:  [
         capitalizeFirstLetter(tag),
         disabled ? 'Disabled' : '',

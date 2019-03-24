@@ -26,7 +26,7 @@ export default class Form extends React.Component {
       if (this.props.onChange instanceof Function)  this.props.onChange(ev)
     }
 
-    const {inputs} = props
+    const {inputs, duringConstruct = () => undefined} = props
 
     this.state = Object.assign(this.state,
       {inputs},
@@ -34,12 +34,16 @@ export default class Form extends React.Component {
       .map(
         ([name,
           { value = '', defaultValue = '', items = [] }
-        ]) => ({
-          [`${this.dataPrefix}${name}`]:
-          items.length > 0
-          ? items[0].value
-          : defaultValue || value
-        })) 
+        ]) => {
+          duringConstruct({name})
+          return {
+            [`${this.dataPrefix}${name}`]:
+            items.length > 0
+            ? items[0].value
+            : defaultValue || value
+          }
+        }
+      )
     );
   }
 
@@ -158,19 +162,19 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {style = {}, id = '', className = ''} = this.props
+    const {style = {}, id = '', className = '', rKey} = this.props
  
     let {gridArea = ''} = style
     gridArea += '/Form' // bug here
  
-    const props = Object.assign({},
+    const /*props = Object.assign({},
       this.props,
       {
         onSubmit: this.ajaxSubmit,
         className: className + ' Form',
         style: Object.assign(style, {gridArea})
       }
-    ),
+    ),*/
     {inputs} = this.state,
       
     children = Object.keys(inputs).map(
@@ -179,10 +183,12 @@ export default class Form extends React.Component {
           inputProps = Object.assign(
             {
               name,
-              form_id: id,
+              className,
+              key: `${rKey}/${name}`,
+              rKey: `${rKey}/${name}`,
+              parentKey: rKey,
               ...input,
               defaultValue: this.state[`${this.dataPrefix}${name}`],
-              gridArea: [gridArea, name, input.tag].join('-'),
               disabled: this.state.disabled || input.disabled,
               onChange: (ev, ...argv) => {
                 if (this.state[`${this.dataPrefix}${name}`] === ev.target.value)
@@ -206,8 +212,6 @@ export default class Form extends React.Component {
       }
     )
     //TODO return just children - move ajaxSubmit to event-listener or directly to onClick
-    return <>
-      {children}
-    </>
+    return children
   }
 }
