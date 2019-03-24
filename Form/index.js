@@ -26,7 +26,7 @@ export default class Form extends React.Component {
       if (this.props.onChange instanceof Function)  this.props.onChange(ev)
     }
 
-    const {inputs, duringConstruct = () => undefined} = props
+    const {inputs} = props
 
     this.state = Object.assign(this.state,
       {inputs},
@@ -34,15 +34,12 @@ export default class Form extends React.Component {
       .map(
         ([name,
           { value = '', defaultValue = '', items = [] }
-        ]) => {
-          duringConstruct({name})
-          return {
-            [`${this.dataPrefix}${name}`]:
-            items.length > 0
-            ? items[0].value
-            : defaultValue || value
-          }
-        }
+        ]) => ({
+          [`${this.dataPrefix}${name}`]:
+          items.length > 0
+          ? items[0].value
+          : defaultValue || value
+        })
       )
     );
   }
@@ -162,28 +159,19 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {style = {}, id = '', className = '', rKey} = this.props
+    const {className = '', rKey} = this.props
  
-    let {gridArea = ''} = style
-    gridArea += '/Form' // bug here
- 
-    const /*props = Object.assign({},
-      this.props,
-      {
-        onSubmit: this.ajaxSubmit,
-        className: className + ' Form',
-        style: Object.assign(style, {gridArea})
-      }
-    ),*/
-    {inputs} = this.state,
+    const {inputs} = this.state,
       
     children = Object.keys(inputs).map(
       name => {
         const input = inputs[name],
+          {duringConstruct} = this.props,
           inputProps = Object.assign(
             {
               name,
               className,
+              duringConstruct,
               key: `${rKey}/${name}`,
               rKey: `${rKey}/${name}`,
               parentKey: rKey,
