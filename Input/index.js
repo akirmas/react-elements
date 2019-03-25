@@ -13,8 +13,7 @@ export default class Input extends React.Component {
         name = '',
         label = '',
         type = '',
-        form_id = '',
-        isValid,
+        isvalid,
         disabled = false,
         required = false,
         style = {},
@@ -29,14 +28,15 @@ export default class Input extends React.Component {
           capitalizeFirstLetter(tag),
           disabled ? 'Disabled' : '',
           required ? 'Required' : '',
-          typeof isValid !== 'undefined' ? isValid === true ? 'Valid' : 'NotValid' : 'NoValidation'
+          typeof isvalid === 'undefined'
+          ? 'NoValidation'
+          : isvalid ? 'Valid' : 'NotValid'
         ].join(' '),
         key: `${tag}${name}`,
         style
       }),
     inputParams = commonParams('input',
       Object.assign(params,
-        form_id === '' ? {} : {form: form_id},
         !params.value ? {} : {disabled: true},
         {
           name,

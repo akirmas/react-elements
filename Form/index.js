@@ -125,9 +125,9 @@ export default class Form extends React.Component {
     const { validator } = this.props.inputs[name];
 
     if (validators[validator]) {
-      const isValid = validators[validator](value);
+      const isvalid = validators[validator](value);
 
-      this.props.inputs[name].isValid = isValid;
+      this.props.inputs[name].isvalid = isvalid;
     }
 
     this.setState({ [`${this.dataPrefix}${name}`]: value })
