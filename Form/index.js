@@ -163,6 +163,8 @@ export default class Form extends React.Component {
   }
 
   pushData({detail: data}) {
+    if (!data || typeof data !== 'object')
+      return;
     Object.entries(data)
     .forEach(([name = '', value = '']) => {
       if (name !== '' && value !== '' && value !== this.state[`${this.dataPrefix}${name}`]) {
