@@ -16,6 +16,7 @@ export default class Input extends React.Component {
         isvalid,
         disabled = false,
         required = false,
+        validator,
         style = {},
         parentKey
       } = this.props,
@@ -29,8 +30,13 @@ export default class Input extends React.Component {
           disabled ? 'Disabled' : '',
           required ? 'Required' : '',
           typeof isvalid === 'undefined'
-          ? 'NoValidation'
-          : isvalid ? 'Valid' : 'NotValid'
+            ? 'NoValidation'
+            : isvalid === 'true' 
+                ? 'Valid' 
+                : 'NotValid',
+          typeof validator !== 'undefined' 
+            ? capitalizeFirstLetter(validator)
+            : '', 
         ].join(' '),
         key: `${tag}${name}`,
         style
