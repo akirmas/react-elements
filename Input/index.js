@@ -21,7 +21,6 @@ export default class Input extends React.Component {
         parentKey
       } = this.props,
       params = Object.assign({name}, this.props)
-
     const commonParams = (tag, params) =>
       Object.assign(params, {
         'data-parentKey': parentKey,
@@ -29,14 +28,14 @@ export default class Input extends React.Component {
           capitalizeFirstLetter(tag),
           disabled ? 'Disabled' : '',
           required ? 'Required' : '',
-          typeof isvalid === 'undefined'
-            ? 'NoValidation'
-            : isvalid === 'true' 
-                ? 'Valid' 
-                : 'NotValid',
-          typeof validator !== 'undefined' 
-            ? capitalizeFirstLetter(validator)
-            : '', 
+          isvalid === true
+          ? 'Valid' 
+          : isvalid === false
+          ? 'NotValid'
+          : 'NoValidation',
+          typeof validator === 'function' 
+          ? capitalizeFirstLetter(validator)
+          : '', 
         ].join(' '),
         key: `${tag}${name}`,
         style
