@@ -95,6 +95,12 @@ export default class Form extends React.Component {
       ev.preventDefault()
     }
 
+    if ( ! this.isFormValid()) {
+      alert('Data is not valid');
+
+      return;
+    }
+
     this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
       {clicked = ''} = this.state,
