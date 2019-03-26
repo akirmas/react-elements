@@ -127,7 +127,10 @@ export default class Form extends React.Component {
     if (validators[validator]) {
       const isvalid = validators[validator](value);
 
-      this.props.inputs[name].isvalid = isvalid;
+      Object.assign(this.props.inputs[name], {
+        isvalid: isvalid.toString(), // Received `true` for a non-boolean attribute `isvalid`
+        validator,
+      });
     }
 
     this.setState({ [`${this.dataPrefix}${name}`]: value })
