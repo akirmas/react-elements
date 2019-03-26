@@ -44,6 +44,26 @@ export default class Form extends React.Component {
     );
   }
 
+  isInputValid(input) {
+    const { validate, isvalid } = input;
+
+    if (typeof validate === 'undefined') {
+      return true;
+    }
+
+    if (typeof validate !== 'undefined' && typeof isvalid === 'undefined') {
+      return false;
+    }
+
+    return isvalid;
+  } 
+
+  isFormValid() {
+    return Object.values(this.state.inputs).every(
+      input => this.isInputValid(input)
+    );
+  }
+
   setDisabled({detail: disabled}) {
     this.setState({disabled})
   }
