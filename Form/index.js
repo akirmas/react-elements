@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Input from '../Input'
-import validators from './validators';
+import Validators from './validators';
 
 export default class Form extends React.Component {
   state = {
@@ -16,7 +16,7 @@ export default class Form extends React.Component {
   constructor(props) {
     super(props);
 
-    ['handleChange', 'pushData', 'ajaxSubmit', 'pushFromInjection', 'setDisabled']
+    ['handleChange', 'pushData', 'ajaxSubmit', 'setDisabled']
     .forEach(method => 
       this[method] = this[method].bind(this)  
     )
@@ -49,13 +49,12 @@ export default class Form extends React.Component {
   }
 
   componentDidMount() {
-    this.pushFromInjection({target: this.props.injector})
-    this.props.injector.addEventListener('dataInjecting', this.pushFromInjection)
+    this.props.injector.addEventListener('dataInjecting', this.pushData)
     this.props.injector.addEventListener('disable', this.setDisabled)
   }
   
   componentWillUnmount() {
-    this.props.injector.removeEventListener('dataInjecting', this.pushFromInjection)
+    this.props.injector.removeEventListener('dataInjecting', this.pushData)
     this.props.injector.removeEventListener('disable', this.setDisabled)
   }
 
@@ -122,42 +121,34 @@ export default class Form extends React.Component {
   }
 
   handleChange({target: {name, value}}) {
-    const { validator } = this.props.inputs[name];
+    const input = this.props.inputs[name],
+      validate = Array.isArray(input.validate)
+      ? input.validate
+      : [input.validate]
 
-    if (validators[validator]) {
-      const isvalid = validators[validator](value);
-
-      Object.assign(this.props.inputs[name], {
-        isvalid: isvalid.toString(), // Received `true` for a non-boolean attribute `isvalid`
-        validator,
-      });
+    let i = 0, isvalid = true
+    while(isvalid && i < validate.length) {
+      const validator = Validators[validate[i]]
+      if (typeof validator === 'function')
+        isvalid = isvalid && validator(value)
+      i++
     }
-
+    
+    input.isvalid = isvalid;
     this.setState({ [`${this.dataPrefix}${name}`]: value })
   }
 
-  pushFromInjection(ev) {
-    const data = ev.target.getAttribute('data-stack')
-    ev.target.setAttribute('data-stack', '')
-    try {
-      this.pushData(JSON.parse(`[${data}]`))
-    } catch (e) {}
-  }
-
-  pushData(data) {
-    (Array.isArray(data) ? data : [data])
-    .forEach(objects => {
-      Object.entries(objects)
-      .forEach(([name = '', value = '']) => {
-        if (name !== '' && value !== '' && value !== this.state[`${this.dataPrefix}${name}`]) {
-          // It is almost copypaste of Input's onChange
-          this.setState({[`${this.dataPrefix}${name}`]: value})
-          if (typeof this.props.onChange === 'function')
-            this.props.onChange({
-              target: { name, value }
-            })
-        }
-      })
+  pushData({detail: data}) {
+    Object.entries(data)
+    .forEach(([name = '', value = '']) => {
+      if (name !== '' && value !== '' && value !== this.state[`${this.dataPrefix}${name}`]) {
+        // It is almost copypaste of Input's onChange
+        this.setState({[`${this.dataPrefix}${name}`]: value})
+        if (typeof this.props.onChange === 'function')
+          this.props.onChange({
+            target: { name, value }
+          })
+      }
     })
   }
 
