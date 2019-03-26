@@ -91,15 +91,13 @@ export default class Form extends React.Component {
   }
 
   ajaxSubmit(ev) {
-    if (ev) {
+    if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
-    }
 
-    if ( ! this.isFormValid()) {
+    /*if (!this.isFormValid()) {
       alert('Data is not valid');
-
       return;
-    }
+    }*/
 
     this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
