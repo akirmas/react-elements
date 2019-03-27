@@ -44,7 +44,21 @@ export default class Form extends React.Component {
     );
   }
 
-  isInputValid(input) {
+  reportValidity(name) {
+    const element = document.querySelector(`[name="${name}"]`);
+
+    if (
+      element && 
+      element.getAttribute('validate') !== null && 
+      element.checkValidity() === false
+    ) {
+      element.reportValidity();
+    }
+  }
+
+  isInputValid(name, input) {
+    this.reportValidity(name);
+    
     const { validate, isvalid } = input;
 
     if (typeof validate === 'undefined') {
@@ -59,9 +73,11 @@ export default class Form extends React.Component {
   } 
 
   isFormValid() {
-    return Object.values(this.state.inputs).every(
-      input => this.isInputValid(input)
-    );
+    return Object
+      .entries(this.state.inputs)
+      .every(
+        ([ name, input ]) => this.isInputValid(name, input)
+      );
   }
 
   setDisabled({detail: disabled}) {
