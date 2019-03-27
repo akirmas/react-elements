@@ -44,7 +44,13 @@ export default class Form extends React.Component {
     );
   }
 
-  reportValidity(name) {
+  verify(callback) {
+    return Object
+      .entries(this.state.inputs)
+      .every(callback);
+  }
+
+  checkInputValidity([ name ]) {
     const element = document.querySelector(`[name="${name}"]`);
 
     if (
@@ -53,12 +59,14 @@ export default class Form extends React.Component {
       element.checkValidity() === false
     ) {
       element.reportValidity();
+
+      return false;
     }
+
+    return true;
   }
 
-  isInputValid(name, input) {
-    this.reportValidity(name);
-    
+  validateInput([ name, input ]) {
     const { validate, isvalid } = input;
 
     if (typeof validate === 'undefined') {
@@ -71,14 +79,6 @@ export default class Form extends React.Component {
 
     return isvalid;
   } 
-
-  isFormValid() {
-    return Object
-      .entries(this.state.inputs)
-      .every(
-        ([ name, input ]) => this.isInputValid(name, input)
-      );
-  }
 
   setDisabled({detail: disabled}) {
     this.setState({disabled})
@@ -110,10 +110,18 @@ export default class Form extends React.Component {
     if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
 
-    /*if (!this.isFormValid()) {
+    const checkInputValidity = (arr) => this.checkInputValidity(arr);
+
+    const validateInput = (arr) => this.validateInput(arr);
+
+    if ( ! this.verify(checkInputValidity)) {
+      return;
+    }
+
+    if ( ! this.verify(validateInput)) {
       alert('Data is not valid');
       return;
-    }*/
+    }
 
     this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
