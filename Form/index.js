@@ -94,15 +94,19 @@ export default class Form extends React.Component {
     this.props.injector.removeEventListener('disable', this.setDisabled)
   }
 
-  collectData() {
+  mapStateToData(state) {
+    return {
+      [state.replace(new RegExp(`^${this.dataPrefix}`), '')]
+      : this.state[state]
+    }
+  }
+
+  withData(callback) {
     return Object.assign({},
       ...Object.keys(this.state)
       .filter(state => state.startsWith(this.dataPrefix))
       .filter(state => this.state[state] !== '')
-      .map(state => ({
-        [state.replace(new RegExp(`^${this.dataPrefix}`), '')]
-        : this.state[state]
-      }))
+      .map(callback)
     )
   }
 
@@ -123,6 +127,8 @@ export default class Form extends React.Component {
       return;
     }
 
+    const mapStateToData = state => this.mapStateToData(state);
+
     this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
       {clicked = ''} = this.state,
@@ -132,7 +138,7 @@ export default class Form extends React.Component {
     let result,
       buttonsMeta = this.props.inputs[clicked],
       data0 = Object.assign(
-        this.collectData(),
+        this.withData(mapStateToData),
         'data' in buttonsMeta
         ? buttonsMeta.data
         : {}
