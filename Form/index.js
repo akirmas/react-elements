@@ -164,13 +164,18 @@ export default class Form extends React.Component {
       return;
     Object.entries(data)
     .forEach(([name = '', value = '']) => {
-      if (name !== '' && value !== '' && value !== this.state[`${this.dataPrefix}${name}`]) {
+      const key = `${this.dataPrefix}${name}`;
+      if (name !== '' && value !== '' && value !== this.state[key]) {
         // It is almost copypaste of Input's onChange
-        this.setState({[`${this.dataPrefix}${name}`]: value})
-        if (typeof this.props.onChange === 'function')
-          this.props.onChange({
-            target: { name, value }
-          })
+        this.setState(
+          {[key]: value},
+          () => {
+            if (typeof this.props.onChange === 'function')
+            this.props.onChange({
+              target: { name, value: this.state[key] }
+            })  
+          }
+        )
       }
     })
   }
