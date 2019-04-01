@@ -92,12 +92,9 @@ export default class Form extends React.Component {
         if (!Array.isArray(validate))
           validate = [validate];
         
-        return validate.every(validator =>
+        return !validate.every(validator =>
           !(validator in Validators)
-          || (
-            console.log({[name]: {[validator] : Validators[validator](value)}}),
-            Validators[validator](value)
-          )
+          || Validators[validator](value)
         )
       })
     if (notValidData.length !== 0) {
