@@ -44,42 +44,6 @@ export default class Form extends React.Component {
     );
   }
 
-  verify(callback) {
-    return Object
-      .entries(this.state.inputs)
-      .every(callback);
-  }
-
-  checkInputValidity([ name ]) {
-    const element = document.querySelector(`[name="${name}"]`);
-
-    if (
-      element && 
-      element.getAttribute('validate') !== null && 
-      element.checkValidity() === false
-    ) {
-      element.reportValidity();
-
-      return false;
-    }
-
-    return true;
-  }
-
-  validateInput([ name, input ]) {
-    const { validate, isvalid } = input;
-
-    if (typeof validate === 'undefined') {
-      return true;
-    }
-
-    if (typeof validate !== 'undefined' && typeof isvalid === 'undefined') {
-      return false;
-    }
-
-    return isvalid;
-  } 
-
   setDisabled({detail: disabled}) {
     this.setState({disabled})
   }
@@ -94,66 +58,75 @@ export default class Form extends React.Component {
     this.props.injector.removeEventListener('disable', this.setDisabled)
   }
 
-  mapStateToData(state) {
-    return {
-      [state.replace(new RegExp(`^${this.dataPrefix}`), '')]
-      : this.state[state]
-    }
-  }
-
-  withData(callback) {
-    return Object.assign({},
-      ...Object.keys(this.state)
-      .filter(state => state.startsWith(this.dataPrefix))
-      .filter(state => this.state[state] !== '')
-      .map(callback)
-    )
+  collectKeyData() {
+    return Object.keys(this.state)
+    .filter(state => state.startsWith(this.dataPrefix))
+    .filter(key => this.state[key] !== '')
   }
 
   ajaxSubmit(ev) {
     if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
 
-    const checkInputValidity = (arr) => this.checkInputValidity(arr);
-
-    const validateInput = (arr) => this.validateInput(arr);
-
-    if ( ! this.verify(checkInputValidity)) {
-      return;
-    }
-
-    if ( ! this.verify(validateInput)) {
-      alert('Data is not valid');
-      return;
-    }
-
-    const mapStateToData = state => this.mapStateToData(state);
-
-    this.setState({disabled: true})
     const setLoaded = () => this.setState({disabled: false}),
-      {clicked = ''} = this.state,
+      {clicked = '', inputs} = this.state,
       handlerNameBefore = `before${clicked}`,
       handlerNameAfter = `after${clicked}`,
-      handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined
-    let result,
-      buttonsMeta = this.props.inputs[clicked],
-      data0 = Object.assign(
-        this.withData(mapStateToData),
+      handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined,
+      buttonsMeta = inputs[clicked],
+      data0 = Object.assign({},
+        ...this.collectKeyData()
+        .map(name => ({
+          [name.replace(new RegExp(`^${this.dataPrefix}`), '')]
+          : this.state[name]
+        })),
         'data' in buttonsMeta
         ? buttonsMeta.data
         : {}
       ),
-      {action, method, data} = Object.assign({},
-        buttonsMeta,
-        {data: data0},
-        !(handlerNameBefore in this.props)
-        ? {}
-        : (result = this.props[handlerNameBefore](data0),
-          typeof result === 'object'
-          ? result
-          : {}
+      notValidData = Object.entries(data0)
+      .filter(([name, value]) => {
+        if (!(name in inputs) || !('validate' in inputs[name]))
+          return false;
+        let {validate} = inputs[name];
+        if (!Array.isArray(validate))
+          validate = [validate];
+        
+        return validate.every(validator =>
+          !(validator in Validators)
+          || (
+            console.log({[name]: {[validator] : Validators[validator](value)}}),
+            Validators[validator](value)
+          )
         )
+      })
+    if (notValidData.length !== 0) {
+      alert(`Data not valid due to:\n${
+        notValidData
+        .map(([name]) => `${
+          inputs[name].label
+        } (${
+          inputs[name].validate.toString()
+        })`)
+        .join(', ')
+      }`)
+      return;
+    }
+
+    let result
+    const {action, method, data} = Object.assign({},
+      buttonsMeta,
+      {data: data0},
+      !(handlerNameBefore in this.props)
+      ? {}
+      : (result = this.props[handlerNameBefore](data0),
+        typeof result === 'object'
+        ? result
+        : {}
       )
+    )
+
+    this.setState({disabled: true})
     fetch(action, Object.assign(
       {
         method,
@@ -175,7 +148,7 @@ export default class Form extends React.Component {
   }
 
   handleChange({target: {name, value}}) {
-    const input = this.props.inputs[name],
+    const input = this.state.inputs[name],
       validate = Array.isArray(input.validate)
       ? input.validate
       : [input.validate]
