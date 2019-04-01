@@ -109,8 +109,8 @@ export default class Form extends React.Component {
 
     let result
     const {action, method, data} = Object.assign({},
-      buttonMeta,
       {data: data0},
+      buttonMeta,
       !(handlerNameBefore in this.props)
       ? {}
       : (result = this.props[handlerNameBefore](data0),
