@@ -73,7 +73,7 @@ export default class Form extends React.Component {
       handlerNameAfter = `after${clicked}`,
       handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined,
       buttonMeta = inputs[clicked],
-      buttonData = 'data' in buttonMeta ? buttonMeta : {},
+      buttonData = 'data' in buttonMeta ? buttonMeta.data : {},
       data0 = Object.assign({},
         ...this.collectKeyData()
         .map(name => ({
