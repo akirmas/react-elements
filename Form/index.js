@@ -73,16 +73,15 @@ export default class Form extends React.Component {
       handlerNameBefore = `before${clicked}`,
       handlerNameAfter = `after${clicked}`,
       handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined,
-      buttonsMeta = inputs[clicked],
+      buttonMeta = inputs[clicked],
+      buttonData = 'data' in buttonMeta ? buttonMeta : {},
       data0 = Object.assign({},
         ...this.collectKeyData()
         .map(name => ({
           [name.replace(new RegExp(`^${this.dataPrefix}`), '')]
           : this.state[name]
         })),
-        'data' in buttonsMeta
-        ? buttonsMeta.data
-        : {}
+        buttonData
       ),
       notValidData = Object.entries(data0)
       .filter(([name, value]) => {
@@ -112,7 +111,7 @@ export default class Form extends React.Component {
 
     let result
     const {action, method, data} = Object.assign({},
-      buttonsMeta,
+      buttonMeta,
       {data: data0},
       !(handlerNameBefore in this.props)
       ? {}
