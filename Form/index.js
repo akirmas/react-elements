@@ -108,17 +108,18 @@ export default class Form extends React.Component {
     }
 
     let result
-    const {action, method, data} = Object.assign({},
-      {data: data0},
-      buttonMeta,
-      !(handlerNameBefore in this.props)
-      ? {}
-      : (result = this.props[handlerNameBefore](data0),
-        typeof result === 'object'
-        ? result
-        : {}
-      )
-    )
+
+    const {action, method} = Object.assign({},
+        buttonMeta,
+        !(handlerNameBefore in this.props)
+        ? {}
+        : (result = this.props[handlerNameBefore](data0),
+          typeof result === 'object'
+          ? result
+          : {}
+        )
+      ),
+      data = Object.assign({}, data0, result.data || {})
 
     this.setState({disabled: true})
     fetch(action, Object.assign(
