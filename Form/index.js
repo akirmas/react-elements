@@ -61,7 +61,6 @@ export default class Form extends React.Component {
   collectKeyData() {
     return Object.keys(this.state)
     .filter(state => state.startsWith(this.dataPrefix))
-    .filter(key => this.state[key] !== '')
   }
 
   ajaxSubmit(ev) {
@@ -90,7 +89,6 @@ export default class Form extends React.Component {
         let {validate} = inputs[name];
         if (!Array.isArray(validate))
           validate = [validate];
-        
         return !validate.every(validator =>
           !(validator in Validators)
           || Validators[validator](value)
