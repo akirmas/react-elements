@@ -23,7 +23,8 @@ export default class Form extends React.Component {
 
     this.onChange = (ev) => {
       this.handleChange(ev)
-      if (this.props.onChange instanceof Function)  this.props.onChange(ev)
+      if (this.props.onChange instanceof Function)
+        this.props.onChange(ev)
     }
 
     const {inputs} = props
@@ -119,7 +120,7 @@ export default class Form extends React.Component {
           : {}
         )
       ),
-      data = Object.assign({}, data0, result.data || {})
+      data = result.data || data0
 
     this.setState({disabled: true})
     fetch(action, Object.assign(
