@@ -9,5 +9,13 @@ export default {
     .reduce((sum, v) => sum + v, 0)
     % 10
     === 0,
+  isracardDirect: (number) => 
+  [
+    ...('0'.repeat(9) + number.toString().replace(/[^0-9]+/g, ''))
+    .substr(-9)
+  ].map((digit, i) => digit * [-2, -3, -4, -5, 5, 4, 3, 2, 1][i])
+  .reduce((sum, v) => sum + v, 0)
+  % 11
+  === 0,
   required: (value) => value !== ''
 }
