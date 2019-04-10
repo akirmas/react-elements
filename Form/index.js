@@ -84,17 +84,11 @@ export default class Form extends React.Component {
         buttonData
       ),
       notValidData = Object.entries(data0)
-      .filter(([name, value]) => {
-        if (!(name in inputs) || !('validate' in inputs[name]))
-          return false;
-        let {validate} = inputs[name];
-        if (!Array.isArray(validate))
-          validate = [validate];
-        return !validate.every(validator =>
-          !(validator in Validators)
-          || Validators[validator](value)
-        )
-      })
+      .filter(([name, value]) =>
+        name in inputs
+        && 'validate' in inputs[name]
+        && !Validators.validate(inputs[name].validate, value)
+      )
     if (notValidData.length !== 0) {
       alert(`Data not valid due to:\n${
         notValidData
@@ -144,20 +138,8 @@ export default class Form extends React.Component {
   }
 
   handleChange({target: {name, value}}) {
-    const input = this.state.inputs[name],
-      validate = Array.isArray(input.validate)
-      ? input.validate
-      : [input.validate]
-
-    let i = 0, isvalid = true
-    while(isvalid && i < validate.length) {
-      const validator = Validators[validate[i]]
-      if (typeof validator === 'function')
-        isvalid = isvalid && validator(value)
-      i++
-    }
-    
-    input.isvalid = isvalid;
+    const input = this.state.inputs[name]
+    input.isvalid = Validators.validate(input.validate, value);
     this.setState({ [`${this.dataPrefix}${name}`]: value })
   }
 
