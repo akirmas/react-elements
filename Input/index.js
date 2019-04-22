@@ -45,7 +45,7 @@ export default class Input extends React.Component {
         !params.value ? {} : {disabled: true},
         {
           name,
-          id: name,
+          id: `${parentKey}/input:${name}`,
         }
       )
     ),
