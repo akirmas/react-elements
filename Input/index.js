@@ -65,7 +65,7 @@ export default class Input extends React.Component {
         inputParams.className += ` ${capitalizeFirstLetter(type)}`
         break
       case 'list':
-        const result = list(inputParams.name, inputParams.items);
+        const result = list(inputParams.name, inputParams.items, inputParams);
         InputTag = result.tag
         inputParams.children = result.children
         break
@@ -105,7 +105,10 @@ export default class Input extends React.Component {
       ? null
       : <label {...labelParams}/>
     }{
-      type === '' ? null : <InputTag {...inputParams}/>
+      type === '' ? null
+      : InputTag === ''
+      ? inputParams.children
+      : <InputTag {...inputParams}/>
     } </>
   }
 }
@@ -123,21 +126,35 @@ const generations = {
 }
 const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week']
 
-function list(name, items) {
+function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
   return {
-    tag: 'select',
-    children: items
-      .map(item => {
-      const normalizedItem = typeof item === 'object'
+    tag: checkbox ? '' : 'select',
+    children: items.map(item => {
+      const itemNormalized = typeof item === 'object'
         ? item
-        : {value: item},        
-        {value, label = value} = normalizedItem
-      return <option
-        key={`Option${name}${label}`}
-          {...{value}}
-        >
-        {label}
-      </option>
+        : {value: item},
+        {value, label = value} = itemNormalized,
+        key = `${parentKey}${name}${value}`,
+        className = [name, value].map(capitalizeFirstLetter).join(' ')
+      return checkbox
+      ? <>
+        <input {...{
+          name, value,
+          type: 'radio',
+          id: key,
+          key,
+          onChange,
+          className: `${className} Input`
+        }}/>
+        <label {...{
+          className: `${className} Label`,
+          htmlFor: key,
+          key: `${key}/Label`
+        }}>{
+          label
+        }</label>
+      </>
+      : <option {...{key, value}}>{label}</option>
     })
   }
 }
