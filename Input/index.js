@@ -1,4 +1,5 @@
 import React from 'react'
+import {capitalizeFirstLetter} from '../../utils'
 
 export default class Input extends React.Component {
   constructor(props) {
@@ -12,7 +13,7 @@ export default class Input extends React.Component {
     const {
         name = '',
         label = '',
-        type = '',
+        type = 'title',
         isvalid,
         disabled = false,
         required = false,
@@ -56,12 +57,12 @@ export default class Input extends React.Component {
 
     let InputTag = 'input'
     switch (type) {
-      case '':
-        labelParams.className += ' Title'
+      case 'title':
+        labelParams.className += ` ${capitalizeFirstLetter(type)}`
         break // if only label is used
       case 'textarea':
-        InputTag = 'textarea'
-        inputParams.className += ' Textarea'
+        InputTag = type
+        inputParams.className += ` ${capitalizeFirstLetter(type)}`
         break
       case 'list':
         const result = list(inputParams.name, inputParams.items);
@@ -70,6 +71,7 @@ export default class Input extends React.Component {
         break
       case 'year':
       case 'month':
+        //TODO: move to list() with 'generator' key
         InputTag = 'select' //TODO: first value is not picked up - generator should be in costructor
         inputParams.children = generate(
           generations[type].count,
@@ -120,11 +122,6 @@ const generations = {
   }
 }
 const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week']
-
-//TODO: move to utils
-function capitalizeFirstLetter(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
 
 function list(name, items) {
   return {
