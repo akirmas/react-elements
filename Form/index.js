@@ -3,12 +3,19 @@ import React from 'react'
 import Input from '../Input'
 import Validators from './validators';
 
+import {applier} from '../../utils'
 export default class Form extends React.Component {
   state = {
     disabled: false,
     clicked: '',
     inputs: {}
   }
+
+  dataForInjector = [
+    ['dataInjecting', this.pushData],
+    ['disable', this.setDisabled]
+  ]
+
   get dataPrefix() {
     return 'data_'
   }
@@ -50,13 +57,10 @@ export default class Form extends React.Component {
   }
 
   componentDidMount() {
-    this.props.injector.addEventListener('dataInjecting', this.pushData)
-    this.props.injector.addEventListener('disable', this.setDisabled)
-  }
-  
+    applier(this.props.injector, 'addEventListener', this.dataForInjector)
+  }  
   componentWillUnmount() {
-    this.props.injector.removeEventListener('dataInjecting', this.pushData)
-    this.props.injector.removeEventListener('disable', this.setDisabled)
+    applier(this.props.injector, 'removeEventListener', this.dataForInjector)
   }
 
   collectKeyData() {
