@@ -64,20 +64,9 @@ export default class Input extends React.Component {
         inputParams.className += ' Textarea'
         break
       case 'list':
-        InputTag = 'select'
-        inputParams.children = inputParams.items
-        .map(item => {
-          const normalizedItem = typeof item === 'object'
-            ? item
-            : {value: item},        
-            {value, label = value} = normalizedItem
-          return <option
-            key={`Option${inputParams.name}${label}`}
-              {...{value}}
-            >
-            {label}
-          </option>
-        })
+        const result = list(inputParams.name, inputParams.items);
+        InputTag = result.tag
+        inputParams.children = result.children
         break
       case 'year':
       case 'month':
@@ -135,4 +124,23 @@ const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local
 //TODO: move to utils
 function capitalizeFirstLetter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function list(name, items) {
+  return {
+    tag: 'select',
+    children: items
+      .map(item => {
+      const normalizedItem = typeof item === 'object'
+        ? item
+        : {value: item},        
+        {value, label = value} = normalizedItem
+      return <option
+        key={`Option${name}${label}`}
+          {...{value}}
+        >
+        {label}
+      </option>
+    })
+  }
 }
