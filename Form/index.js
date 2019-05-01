@@ -20,6 +20,23 @@ export default class Form extends React.Component {
     return 'data_'
   }
 
+  inputsToState(inputs) {
+    return Object.assign({},
+      {inputs},
+      ...Object.entries(inputs)
+      .map(
+        ([name,
+          { value = '', defaultValue = '', items = [] }
+        ]) => ({
+          [`${this.dataPrefix}${name}`]:
+          items.length > 0
+          ? items[0].value
+          : defaultValue || value
+        })
+      )
+    )
+  }
+
   constructor(props) {
     super(props);
 
@@ -33,23 +50,7 @@ export default class Form extends React.Component {
       if (this.props.onChange instanceof Function)
         this.props.onChange(ev)
     }
-
-    const {inputs} = props
-
-    this.state = Object.assign(this.state,
-      {inputs},
-      ...Object.entries(inputs)
-      .map(
-        ([name,
-          { value = '', defaultValue = '', items = [] }
-        ]) => ({
-          [`${this.dataPrefix}${name}`]:
-          items.length > 0
-          ? items[0].value
-          : defaultValue || value
-        })
-      )
-    );
+    this.setState(Object.assign(this.state, this.inputsToState(props.inputs)))
   }
 
   setDisabled({detail: disabled}) {
@@ -168,46 +169,43 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {className = '', rKey} = this.props
- 
-    const {inputs} = this.state,
-      
-    children = Object.keys(inputs).map(
-      name => {
-        const input = inputs[name],
-          {duringConstruct} = this.props,
-          inputProps = Object.assign(
-            {
-              name,
-              className,
-              duringConstruct,
-              key: `${rKey}/${name}`,
-              rKey: `${rKey}/${name}`,
-              parentKey: rKey,
-              ...input,
-              defaultValue: this.state[`${this.dataPrefix}${name}`],
-              disabled: this.state.disabled || input.disabled,
-              onChange: (ev, ...argv) => {
-                if (this.state[`${this.dataPrefix}${name}`] === ev.target.value)
-                  return;
-                this.setState({
-                  [`${this.dataPrefix}${name}`] : ev.target.value
-                })
-                this.onChange(ev, ...argv)
-              }
-            },
-            // Signing last click for handler
-            (`before${name}` in this.props || `on${name}` in this.props || `after${name}` in this.props || input.type === 'submit')
-            ? { onClick: () => {
-              this.setState({clicked: name}, () => {
-                this.ajaxSubmit(null, name);
-              });
-            } }
-            : {}
-          )
-        return <Input {...inputProps}/>
-      }
-    )
+    const {className = '', rKey, inputs} = this.props,
+      children = Object.keys(inputs).map(
+        name => {
+          const input = inputs[name],
+            {duringConstruct} = this.props,
+            inputProps = Object.assign(
+              {
+                name,
+                className,
+                duringConstruct,
+                key: `${rKey}/${name}`,
+                rKey: `${rKey}/${name}`,
+                parentKey: rKey,
+                ...input,
+                defaultValue: this.state[`${this.dataPrefix}${name}`],
+                disabled: this.state.disabled || input.disabled,
+                onChange: (ev, ...argv) => {
+                  if (this.state[`${this.dataPrefix}${name}`] === ev.target.value)
+                    return;
+                  this.setState({
+                    [`${this.dataPrefix}${name}`] : ev.target.value
+                  })
+                  this.onChange(ev, ...argv)
+                }
+              },
+              // Signing last click for handler
+              (`before${name}` in this.props || `on${name}` in this.props || `after${name}` in this.props || input.type === 'submit')
+              ? { onClick: () => {
+                this.setState({clicked: name}, () => {
+                  this.ajaxSubmit(null, name);
+                });
+              } }
+              : {}
+            )
+          return <Input {...inputProps}/>
+        }
+      )
     //TODO return just children - move ajaxSubmit to event-listener or directly to onClick
     return children
   }
