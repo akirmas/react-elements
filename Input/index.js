@@ -66,14 +66,18 @@ export default class Input extends React.Component {
       case 'list':
         InputTag = 'select'
         inputParams.children = inputParams.items
-        .map(({value, label = value}) =>
-          <option
+        .map(item => {
+          const normalizedItem = typeof item === 'object'
+            ? item
+            : {value: item},        
+            {value, label = value} = normalizedItem
+          return <option
             key={`Option${inputParams.name}${label}`}
               {...{value}}
             >
             {label}
           </option>
-        )
+        })
         break
       case 'year':
       case 'month':
