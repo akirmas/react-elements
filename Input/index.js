@@ -81,7 +81,6 @@ export default class Input extends React.Component {
         break
       case 'year':
       case 'month':
-      case 'payments':
         InputTag = 'select' //TODO: first value is not picked up - generator should be in costructor
         inputParams.children = generate(
           generations[type].count,
@@ -129,10 +128,6 @@ const generations = {
   year: {
     startValue: new Date().getFullYear() - 1,
     count: 22
-  },
-  payments: {
-    startValue: 0,
-    count: 12
   }
 }
 const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week']
