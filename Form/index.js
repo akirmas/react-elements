@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Input from '../Input'
+import KeyHelper from './KeyHelper'
 import Validators from './validators';
 
 import {applier} from '../../utils'
@@ -16,10 +17,6 @@ export default class Form extends React.Component {
     ['disable', this.setDisabled]
   ]
 
-  get dataPrefix() {
-    return 'data_'
-  }
-
   inputsToState(inputs) {
     return Object.assign({},
       {inputs},
@@ -28,8 +25,9 @@ export default class Form extends React.Component {
         ([name,
           { value = '', defaultValue = '', items = [] }
         ]) => ({
-          [`${this.dataPrefix}${name}`]:
-          items.length > 0
+          [
+            KeyHelper.data(name)
+          ] : items.length > 0
           ? items[0].value
           : defaultValue || value
         })
@@ -50,7 +48,7 @@ export default class Form extends React.Component {
       if (this.props.onChange instanceof Function)
         this.props.onChange(ev)
     }
-    this.setState(Object.assign(this.state, this.inputsToState(props.inputs)))
+    this.state = Object.assign(this.state, this.inputsToState(props.inputs))
   }
 
   setDisabled({detail: disabled}) {
@@ -66,7 +64,7 @@ export default class Form extends React.Component {
 
   collectKeyData() {
     return Object.keys(this.state)
-    .filter(state => state.startsWith(this.dataPrefix))
+    .filter(k =>  KeyHelper.is(k))
   }
 
   ajaxSubmit(ev) {
@@ -83,8 +81,9 @@ export default class Form extends React.Component {
       data0 = Object.assign({},
         ...this.collectKeyData()
         .map(name => ({
-          [name.replace(new RegExp(`^${this.dataPrefix}`), '')]
-          : this.state[name]
+          [
+            KeyHelper.pure(name)
+          ] : this.state[name]
         })),
         buttonData
       ),
@@ -106,7 +105,6 @@ export default class Form extends React.Component {
       }`)
       return;
     }
-
     let result = {}
     const {action, method} = Object.assign({},
         buttonMeta,
@@ -119,7 +117,6 @@ export default class Form extends React.Component {
         )
       ),
       data = result.data || data0
-
     this.setState({disabled: true})
     fetch(action, Object.assign(
       {
@@ -144,7 +141,7 @@ export default class Form extends React.Component {
   handleChange({target: {name, value}}) {
     const input = this.state.inputs[name]
     input.isvalid = Validators.validate(input.validate, value);
-    this.setState({ [`${this.dataPrefix}${name}`]: value })
+    this.setState({ [KeyHelper.data(name)]: value })
   }
 
   pushData({detail: data}) {
@@ -152,7 +149,7 @@ export default class Form extends React.Component {
       return;
     Object.entries(data)
     .forEach(([name = '', value = '']) => {
-      const key = `${this.dataPrefix}${name}`;
+      const key = KeyHelper.data(name)
       if (name !== '' && value !== '' && value !== this.state[key]) {
         // It is almost copypaste of Input's onChange
         this.setState(
@@ -174,6 +171,8 @@ export default class Form extends React.Component {
         name => {
           const input = inputs[name],
             {duringConstruct} = this.props,
+            dataKey = KeyHelper.data(name),
+            stateValue = this.state[dataKey],
             inputProps = Object.assign(
               {
                 name,
@@ -183,13 +182,13 @@ export default class Form extends React.Component {
                 rKey: `${rKey}/${name}`,
                 parentKey: rKey,
                 ...input,
-                defaultValue: this.state[`${this.dataPrefix}${name}`],
+                defaultValue: stateValue,
                 disabled: this.state.disabled || input.disabled,
                 onChange: (ev, ...argv) => {
-                  if (this.state[`${this.dataPrefix}${name}`] === ev.target.value)
+                  if (stateValue === ev.target.value)
                     return;
                   this.setState({
-                    [`${this.dataPrefix}${name}`] : ev.target.value
+                    [dataKey] : ev.target.value
                   })
                   this.onChange(ev, ...argv)
                 }
