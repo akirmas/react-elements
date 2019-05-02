@@ -105,7 +105,8 @@ export default class Input extends React.Component {
       ? null
       : <label {...labelParams}/>
     }{
-      type === '' ? null
+      type === ''
+      ? null
       : InputTag === ''
       ? inputParams.children
       : <InputTag {...inputParams}/>
