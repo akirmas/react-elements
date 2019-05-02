@@ -52,6 +52,7 @@ export default class Input extends React.Component {
     ),
     labelParams = commonParams('label', {
       htmlFor: inputParams.id,
+      name,
       children: label
     })
 
@@ -148,6 +149,7 @@ function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
           className: `${className} Input`
         }}/>
         <label {...{
+          name,
           className: `${className} Label`,
           htmlFor: key,
           key: `${key}/Label`
