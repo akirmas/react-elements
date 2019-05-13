@@ -1,6 +1,8 @@
 import React from 'react'
 import {capitalizeFirstLetter} from '../../utils'
 
+import renderJson from '../../utils/renderJson'
+
 export default class Input extends React.Component {
   constructor(props) {
     super(props)
@@ -138,6 +140,7 @@ function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
         {value, label = value} = itemNormalized,
         key = `${parentKey}${name}${value}`,
         className = [name, value].map(capitalizeFirstLetter).join(' ')
+
       return checkbox
       ? <>
         <input {...{
@@ -154,7 +157,9 @@ function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
           htmlFor: key,
           key: `${key}/Option`
         }}>{
-          label
+          React.isValidElement(label)
+          ? label
+          : renderJson(label)
         }</label>
       </>
       : <option {...{key, value}}>{label}</option>
