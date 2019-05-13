@@ -150,9 +150,9 @@ function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
         }}/>
         <label {...{
           name,
-          className: `${className} Label`,
+          className: `${className} Option`,
           htmlFor: key,
-          key: `${key}/Label`
+          key: `${key}/Option`
         }}>{
           label
         }</label>
