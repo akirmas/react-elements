@@ -12,10 +12,7 @@ export default class Form extends React.Component {
     inputs: {}
   }
 
-  dataForInjector = [
-    ['dataInjecting', this.pushData],
-    ['disable', this.setDisabled]
-  ]
+  dataForInjector = []
 
   inputsToState(inputs) {
     return Object.assign({},
@@ -42,6 +39,11 @@ export default class Form extends React.Component {
     .forEach(method => 
       this[method] = this[method].bind(this)  
     )
+
+    this.dataForInjector = [
+      ['dataInjecting', this.pushData],
+      ['disable', this.setDisabled]
+    ]
 
     this.onChange = (ev) => {
       this.handleChange(ev)
