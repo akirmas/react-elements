@@ -142,7 +142,7 @@ export default class Form extends React.Component {
 
   handleChange({target: {name, value}}) {
     const input = this.state.inputs[name]
-    input.isvalid = Validators.validate(input.validate, value);
+    input.isvalid = Validators.validate(input.validate, value) * 1;
     this.setState({ [KeyHelper.data(name)]: value })
   }
 
@@ -168,10 +168,11 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {className = '', rKey, inputs} = this.props,
+    const {className = '', rkey, inputs} = this.props,
       children = Object.keys(inputs).map(
         name => {
-          const input = inputs[name],
+          const key = `${rkey}/${name}`,
+            input = inputs[name],
             {duringConstruct} = this.props,
             dataKey = KeyHelper.data(name),
             stateValue = this.state[dataKey],
@@ -180,9 +181,8 @@ export default class Form extends React.Component {
                 name,
                 className,
                 duringConstruct,
-                key: `${rKey}/${name}`,
-                rKey: `${rKey}/${name}`,
-                parentKey: rKey,
+                rkey: key,
+                parentkey: rkey,
                 ...input,
                 defaultValue: stateValue,
                 disabled: this.state.disabled || input.disabled,
@@ -204,7 +204,7 @@ export default class Form extends React.Component {
               } }
               : {}
             )
-          return <Input {...inputProps}/>
+          return <Input key={key} {...inputProps}/>
         }
       )
     //TODO return just children - move ajaxSubmit to event-listener or directly to onClick

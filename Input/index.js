@@ -11,6 +11,11 @@ export default class Input extends React.Component {
       duringConstruct(props)
   }
   
+  componentWillMount() {
+    const {onChange, value, defaultValue, name} = this.props
+    onChange({target: {name, value: value || defaultValue}})
+  }
+
   render() {
     const {
         name = '',
@@ -21,21 +26,19 @@ export default class Input extends React.Component {
         required = false,
         validator,
         style = {},
-        parentKey
+        parentkey
       } = this.props,
       params = Object.assign({name}, this.props)
+      delete params.duringConstruct
+
     const commonParams = (tag, params) =>
       Object.assign(params, {
-        'data-parentKey': parentKey,
+        'data-parentkey': parentkey,
         className:  [
           capitalizeFirstLetter(tag),
           disabled ? 'Disabled' : '',
           required ? 'Required' : '',
-          isvalid === true
-          ? 'Valid' 
-          : isvalid === false
-          ? 'NotValid'
-          : 'NoValidation',
+          ['NoValidation', 'NotValid', 'Valid'][1 + isvalid],
           typeof validator === 'function' 
           ? capitalizeFirstLetter(validator)
           : '', 
@@ -48,7 +51,7 @@ export default class Input extends React.Component {
         !params.value ? {} : {disabled: true},
         {
           name,
-          id: `${parentKey}/input:${name}`,
+          id: `${parentkey}/input:${name}`,
         }
       )
     ),
@@ -101,8 +104,10 @@ export default class Input extends React.Component {
           return []
         else inputParams.type = type
     }
-    if (['textarea', 'select'].includes(InputTag) || type === 'hidden')
-      inputParams.value = inputParams.defaultValue
+
+    inputParams.value = inputParams.value || inputParams.defaultValue
+    delete inputParams.defaultValue
+
     return <> {
       label === '' || ['submit', 'button', 'hidden'].includes(type)
       ? null
@@ -130,7 +135,7 @@ const generations = {
 }
 const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week']
 
-function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
+function list(name, items, {checkbox = false, parentkey = '', onChange} = {}) {
   return {
     tag: checkbox ? '' : 'select',
     children: items.map(item => {
@@ -138,7 +143,7 @@ function list(name, items, {checkbox = false, parentKey = '', onChange} = {}) {
         ? item
         : {value: item},
         {value, label = value} = itemNormalized,
-        key = `${parentKey}${name}${value}`,
+        key = `${parentkey}${name}${value}`,
         className = [name, value].map(capitalizeFirstLetter).join(' ')
 
       return checkbox
