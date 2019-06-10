@@ -135,7 +135,8 @@ const generations = {
 }
 const commonInputTypes = ['button', 'checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'hidden', 'image', 'month', 'number', 'password', 'radio', 'range', 'reset', 'search', 'submit', 'tel', 'text', 'time', 'url', 'week']
 
-function list(name, items, {checkbox = false, parentkey = '', onChange} = {}) {
+function list(name, items, props = {}) {
+  const {checkbox = false, parentkey = ''} = props
   return {
     tag: checkbox ? '' : 'select',
     children: items.map(item => {
@@ -148,14 +149,13 @@ function list(name, items, {checkbox = false, parentkey = '', onChange} = {}) {
 
       return checkbox
       ? <>
-        <input {...{
+        <input { ...Object.assign({}, props, {
           name, value,
           type: 'radio',
           id: key,
           key,
-          onChange,
           className: `${className} Input`
-        }}/>
+        })}/>
         <label {...{
           name,
           className: `${className} Option`,
