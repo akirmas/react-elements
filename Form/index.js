@@ -48,7 +48,7 @@ export default class Form extends React.Component {
     this.onChange = (ev) => {
       this.handleChange(ev)
       if (props.onChange instanceof Function)
-        props.onChange(ev)
+        props.onChange(ev, this)
     }
     this.state = Object.assign(this.state, this.inputsToState(props.inputs))
   }
