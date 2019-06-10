@@ -91,7 +91,6 @@ export default class Form extends React.Component {
   ajaxSubmit(ev, {name, onInvalid}) {
     if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
-
     const setLoaded = () => this.setState({disabled: false}),
       {inputs} = this.state,
       clicked = name || this.state.clicked || '',
@@ -107,22 +106,24 @@ export default class Form extends React.Component {
       notValidData = this.invalidData(data0)
     if (notValidData.length !== 0) {
       if (typeof onInvalid === 'function')
-        onInvalid(notValidData)
-      return;
+        if (!onInvalid(notValidData))
+          return;
     }
-    let result = {}
-    const {action, method} = Object.assign({},
-        buttonMeta,
-        !(handlerNameBefore in this.props)
-        ? {}
-        : (result = this.props[handlerNameBefore](data0),
-          typeof result === 'object'
-          ? result
-          : {}
-        )
-      ),
+    
+    let result = !(handlerNameBefore in this.props)
+    ? {}
+    : this.props[handlerNameBefore](data0)
+    if (result === false)
+      return;
+    result = typeof result === 'object' ? result : {}
+
+    const {action, method} = Object.assign({}, buttonMeta, result),
       {data: defaultData = {}} = this.props,
       data = Object.assign({}, defaultData, result.data || data0)
+
+    if (!action)
+      return handlerAfter(data)
+
     this.setState({disabled: true})
     fetch(action, Object.assign(
       {
