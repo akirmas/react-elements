@@ -47,7 +47,7 @@ export default class Form extends React.Component {
 
     this.onChange = (ev) => {
       this.handleChange(ev)
-      if (props.onChange instanceof Function)
+      if (typeof props.onChange === 'function')
         props.onChange(ev, this)
     }
     this.state = Object.assign(this.state, this.inputsToState(props.inputs))
@@ -68,43 +68,46 @@ export default class Form extends React.Component {
     return Object.keys(this.state)
     .filter(k =>  KeyHelper.is(k))
   }
+  collectData() {
+    return Object.assign({},
+      ...this.collectKeyData()
+      .map(name => ({
+        [
+          KeyHelper.pure(name)
+        ] : this.state[name]
+      }))
+    )
+  }
+  invalidData(data) {
+    const {inputs} = this.state
+    return Object.entries(data)
+    .filter(([name, value]) =>
+      name in inputs
+      && 'validate' in inputs[name]
+      && !Validators.validate(inputs[name].validate, value)
+    )
+  }
 
-  ajaxSubmit(ev) {
+  ajaxSubmit(ev, {name, onInvalid}) {
     if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
 
     const setLoaded = () => this.setState({disabled: false}),
-      {clicked = '', inputs} = this.state,
+      {inputs} = this.state,
+      clicked = name || this.state.clicked || '',
       handlerNameBefore = `before${clicked}`,
       handlerNameAfter = `after${clicked}`,
       handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined,
       buttonMeta = inputs[clicked],
       buttonData = 'data' in buttonMeta ? buttonMeta.data : {},
       data0 = Object.assign({},
-        ...this.collectKeyData()
-        .map(name => ({
-          [
-            KeyHelper.pure(name)
-          ] : this.state[name]
-        })),
+        this.collectData(),
         buttonData
       ),
-      notValidData = Object.entries(data0)
-      .filter(([name, value]) =>
-        name in inputs
-        && 'validate' in inputs[name]
-        && !Validators.validate(inputs[name].validate, value)
-      )
+      notValidData = this.invalidData(data0)
     if (notValidData.length !== 0) {
-      alert(`Data not valid due to:\n${
-        notValidData
-        .map(([name]) => `${
-          inputs[name].label
-        } (${
-          inputs[name].validate.toString()
-        })`)
-        .join(', ')
-      }`)
+      if (typeof onInvalid === 'function')
+        onInvalid(notValidData)
       return;
     }
     let result = {}
@@ -169,7 +172,7 @@ export default class Form extends React.Component {
   }
 
   render() {
-    const {className = '', rkey, inputs} = this.props,
+    const {className = '', rkey, inputs, onInvalid} = this.props,
       children = Object.keys(inputs).map(
         name => {
           const key = `${rkey}/${name}`,
@@ -198,11 +201,11 @@ export default class Form extends React.Component {
               },
               // Signing last click for handler
               (`before${name}` in this.props || `on${name}` in this.props || `after${name}` in this.props || input.type === 'submit')
-              ? { onClick: () => {
-                this.setState({clicked: name}, () => {
-                  this.ajaxSubmit(null, name);
-                });
-              } }
+              ? { onClick: () =>
+                this.setState({clicked: name}, () =>
+                  this.ajaxSubmit(null, {name, onInvalid})
+                )
+              }
               : {}
             )
           return <Input key={key} {...inputProps}/>
