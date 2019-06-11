@@ -109,7 +109,7 @@ export default class Form extends React.Component {
       notValidData = this.invalidData(data0)
     if (notValidData.length !== 0) {
       if (typeof onInvalid === 'function')
-        if (!onInvalid(notValidData))
+        if (onInvalid(notValidData, inputs) !== false)
           return;
     }
     
