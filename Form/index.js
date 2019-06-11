@@ -86,7 +86,7 @@ export default class Form extends React.Component {
     )
   }
 
-  ajaxSubmit(ev, {name, onInvalid}) {
+  ajaxSubmit(ev, {name, onInvalid}, cb) {
     if (ev && typeof ev.preventDefault === "function")
       ev.preventDefault()
     const setLoaded = () => this.setState({disabled: false}),
@@ -94,7 +94,12 @@ export default class Form extends React.Component {
       clicked = name || this.state.clicked || '',
       handlerNameBefore = `before${clicked}`,
       handlerNameAfter = `after${clicked}`,
-      handlerAfter = handlerNameAfter in this.props ? this.props[handlerNameAfter].bind(this) : () => undefined,
+      handlerAfter = (...args) => {
+        if (handlerNameAfter in this.props)
+          this.props[handlerNameAfter].apply(this, args)
+        if (cb)
+          cb(...args)
+      },
       buttonMeta = inputs[clicked],
       buttonData = 'data' in buttonMeta ? buttonMeta.data : {},
       data0 = Object.assign({},
@@ -143,10 +148,10 @@ export default class Form extends React.Component {
     .catch(console.error)
   }
 
-  handleChange({target: {name, value}}) {
+  handleChange({target: {name, value}}, cb = () => undefined) {
     const input = this.state.inputs[name]
     input.isvalid = Validators.validate(input.validate, value) * 1;
-    this.setState({ [KeyHelper.data(name)]: value })
+    this.setState({[KeyHelper.data(name)]: value}, cb)
   }
 
   pushData({detail: data}) {

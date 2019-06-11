@@ -146,7 +146,6 @@ function list(name, items, props = {}) {
         {value, label = value} = itemNormalized,
         key = `${parentkey}${name}${value}`,
         className = [name, value].map(capitalizeFirstLetter).join(' ')
-
       return checkbox
       ? <>
         <input { ...Object.assign({}, props, {
@@ -154,7 +153,9 @@ function list(name, items, props = {}) {
           type: 'radio',
           id: key,
           key,
-          className: `${className} Input`
+          className: `${className} Input`,
+          onClick: (...args) => props.onChange(...args),
+          onChange: null
         })}/>
         <label {...{
           name,
