@@ -192,10 +192,10 @@ export default class Form extends React.Component {
                 onChange: (ev, ...argv) => {
                   if (stateValue === ev.target.value)
                     return;
-                  this.setState({
-                    [dataKey] : ev.target.value
-                  })
-                  this.onChange(ev, ...argv)
+                  if (this.onChange(ev, ...argv) !== false)
+                    this.setState({
+                      [dataKey] : ev.target.value
+                    })
                 }
               },
               // Signing last click for handler
