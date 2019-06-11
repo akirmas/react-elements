@@ -24,9 +24,7 @@ export default class Form extends React.Component {
         ]) => ({
           [
             KeyHelper.data(name)
-          ] : items.length > 0
-          ? items[0].value
-          : defaultValue || value
+          ] : defaultValue || value
         })
       )
     )
